@@ -25,7 +25,7 @@ install_dependencies() {
 
 run() {
     g++-7 -fcilkplus source/chronograph.cpp -o chronograph \
-        -l cilkrts -l divsufsort -l libprange
+        -l cilkrts -l divsufsort -l libprange &&
     ./chronograph "$@"
     rm -rf chronograph
 }
