@@ -23,11 +23,19 @@ install_dependencies() {
     make install
 }
 
+run() {
+    g++-7 -fcilkplus source/chronograph.cpp -o chronograph \
+        -l cilkrts -l divsufsort -l libprange
+    ./chronograph "$@"
+    rm -rf chronograph
+}
+
 case "$1" in
     "--install-deps")
         install_dependencies
         ;;
     "--run")
+        run "${@:2}"
         ;;
     "--analyze")
         ;;
