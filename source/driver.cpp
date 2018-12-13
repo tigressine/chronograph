@@ -1,4 +1,5 @@
-// Driver program to test the parallel-divsufsort library.
+// A driver program that tests the parallel-divsufsort library. This isn't
+// the cleanest C++ you'll ever see. Please forgive my inevitable blasphemies.
 // Written by Tiger Sachse.
 
 #include <cmath>
@@ -63,17 +64,30 @@ void write_averages(double* averages, int max_threads, char* input_name) {
         return;
     }
 
-    // Create the output file string.
+    // Create the output file name string.
     std::string input_string(input_name);
     auto start = input_string.find_last_of("/");
     auto stop = input_string.find_last_of(".");
     start = (start == std::string::npos) ? 0 : start + 1;
     stop = (stop == std::string::npos) ? input_string.length() : stop - 1;
-    std::string output_name = "results/"
-                              + input_string.substr(start, stop - start + 1)
-                              + ".out";
+    std::string output_name = input_string.substr(start, stop - start + 1) + ".out";
 
-    // write to file.
+    // Open the output file.
+    std::ofstream output_file(output_name);
+    if (output_file.fail()) {
+        std::cout << "File '" << output_name << "' could not be written.\n";
+
+        return;
+    }
+
+    // Write the results to the output file.
+    output_file << "Results for '" << input_name << "'\n";
+    for (int thread = 1; thread <= max_threads; thread++) {
+        output_file << "Thread count: " << thread;
+        output_file << " | Seconds: " << averages[thread - 1] << "\n";
+    }
+
+    output_file.close();
 }
 
 // Main function and entry point of the program.
