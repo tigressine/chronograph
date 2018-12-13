@@ -6,11 +6,12 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <string.h>
 #include <divsufsort.h>
 #include <cilk/cilk_api.h>
 
 // Run timed divsufsort tests for a string using a range of thread counts.
-void run_tests(const std::string& text, int max_threads, int max_runs) {
+double* run_tests(const std::string& text, int max_threads, int max_runs) {
     auto size = text.size();
     auto suffix_array = new int64_t[size];
     auto total_times = new std::chrono::milliseconds[max_threads]();
@@ -18,12 +19,18 @@ void run_tests(const std::string& text, int max_threads, int max_runs) {
     // For each run, test the function using a range of thread caps.
     for (int run = 0; run < max_runs; run++) {
         for (int thread = 1; thread <= max_threads; thread++) {
-            char* buffer = new char[(int) std::log10(max_threads) + 2]();
+
+            // Write a character array version of the thread number to the buffer.
+            auto buffer = new char[(int) std::log10(max_threads) + 2]();
             sprintf(buffer, "%d", thread);
+
+            // Set the number of threads for this function call.
             __cilkrts_end_cilk();
             __cilkrts_set_param("nworkers", buffer);
+
             delete[] buffer;
 
+            // Run the function and save the start and end times.
             auto start = std::chrono::steady_clock::now();
             divsufsort((sauchar_t*) text.data(), suffix_array, size);
             auto end = std::chrono::steady_clock::now();
@@ -35,15 +42,38 @@ void run_tests(const std::string& text, int max_threads, int max_runs) {
         }
     }
 
-    // Print the average run time for each thread cap.
+    // Calculate the averages for every thread count.
+    auto averages = new double[max_threads];
     for (int thread = 1; thread <= max_threads; thread++) {
-        printf("%d thread%s: ", thread, (thread == 1) ? "" : "s");
-        printf("%lf seconds\n", total_times[thread - 1].count() / 1000.0 / max_runs);
+        averages[thread - 1] = total_times[thread - 1].count() / 1000.0 / max_runs;
     }
 
     // Clean up after yourself!
     delete[] total_times;
     delete[] suffix_array;
+
+    return averages;
+}
+
+// Write the averages array to a data output file.
+void write_averages(double* averages, int max_threads, char* input_name) {
+    if (averages == NULL || input_name == NULL) {
+        std::cout << "Passed NULL to write_averages!\n";
+
+        return;
+    }
+
+    // Create the output file string.
+    std::string input_string(input_name);
+    auto start = input_string.find_last_of("/");
+    auto stop = input_string.find_last_of(".");
+    start = (start == std::string::npos) ? 0 : start + 1;
+    stop = (stop == std::string::npos) ? input_string.length() : stop - 1;
+    std::string output_name = "results/"
+                              + input_string.substr(start, stop - start + 1)
+                              + ".out";
+
+    // write to file.
 }
 
 // Main function and entry point of the program.
@@ -65,8 +95,8 @@ int main(int argument_count, char* arguments[]) {
     }
 
     // Parse max_threads and max_runs from the input vector.
-    int max_threads = std::stoi(arguments[2], NULL, 10);
-    int max_runs = std::stoi(arguments[3], NULL, 10);
+    auto max_threads = std::stoi(arguments[2], NULL, 10);
+    auto max_runs = std::stoi(arguments[3], NULL, 10);
 
     // Create a string from the text file.
     std::string text;
@@ -75,7 +105,11 @@ int main(int argument_count, char* arguments[]) {
     input.seekg(0, std::ios::beg);
     text.assign((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 
-    run_tests(text, max_threads, max_runs);
+    // Capture averages for different thread counts from the tests.
+    // Write these averages to a data file, then free the averages array.
+    auto averages = run_tests(text, max_threads, max_runs);
+    write_averages(averages, max_threads, arguments[1]);
+    delete[] averages;
 
     return 0;
 }
