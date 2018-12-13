@@ -20,6 +20,7 @@ void run_tests(const std::string& text, int max_threads, int max_runs) {
         for (int thread = 1; thread <= max_threads; thread++) {
             char* buffer = new char[(int) std::log10(max_threads) + 2]();
             sprintf(buffer, "%d", thread);
+            __cilkrts_end_cilk();
             __cilkrts_set_param("nworkers", buffer);
             delete[] buffer;
 
