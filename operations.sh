@@ -1,8 +1,9 @@
 # Operations script to make working with this repository easier.
 # Written by Tiger Sachse.
 
-BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
 DRIVER_NAME="timer"
+ANALYZER_NAME="analyzer.py"
+BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
 
 # Install necessary dependencies for this repository to function.
 install_dependencies() {
@@ -40,8 +41,9 @@ run() {
     rm -rf $DRIVER_NAME
 }
 
+# Analyze the results using the provided Python script.
 analyze() {
-    echo ""
+    python3 source/$ANALYZER_NAME $1
 }
 
 # Main entry point of this script.
@@ -53,6 +55,6 @@ case "$1" in
         run "${@:2}"
         ;;
     "--analyze")
-        analyze "$@"
+        analyze $2
         ;;
 esac
