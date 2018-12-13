@@ -2,7 +2,7 @@
 # Written by Tiger Sachse.
 
 BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
-PROGRAM_NAME="chronograph"
+DRIVER_NAME="timer"
 
 # Install necessary dependencies for this repository to function.
 install_dependencies() {
@@ -12,7 +12,7 @@ install_dependencies() {
     fi
 
     # This function needs these packages to build the required divsufsort library.
-    apt install git cmake make g++-7
+    apt install git cmake make g++-7 python3-matplotlib
 
     # Override any existing compilers and use the g++-7 compiler.
     export CC="g++-7;$CC"
@@ -34,10 +34,14 @@ install_dependencies() {
 
 # Run the repository driver to test the divsufsort library.
 run() {
-    g++-7 -fcilkplus source/$PROGRAM_NAME.cpp -o $PROGRAM_NAME \
+    g++-7 -fcilkplus source/$DRIVER_NAME.cpp -o $DRIVER_NAME \
         -l cilkrts -l divsufsort -l libprange &&
-    ./$PROGRAM_NAME "$@"
-    rm -rf $PROGRAM_NAME
+    ./$DRIVER_NAME "$@"
+    rm -rf $DRIVER_NAME
+}
+
+analyze() {
+    echo ""
 }
 
 # Main entry point of this script.
@@ -49,5 +53,6 @@ case "$1" in
         run "${@:2}"
         ;;
     "--analyze")
+        analyze "$@"
         ;;
 esac
