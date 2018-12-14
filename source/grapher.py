@@ -1,4 +1,4 @@
-"""Analyze parallelized divsufsort data.
+"""Graph parallelized divsufsort timing data.
 
 Written by Tiger Sachse.
 """

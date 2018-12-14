@@ -1,8 +1,8 @@
-# Operations script to make working with this repository easier.
+# An operations script that makes working with this repository easier.
 # Written by Tiger Sachse.
 
-DRIVER_NAME="timer"
-ANALYZER_NAME="analyzer.py"
+ANALYZER_NAME="analyzer"
+GRAPHER_NAME="grapher.py"
 BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
 
 # Install necessary dependencies for this repository to function.
@@ -34,16 +34,16 @@ install_dependencies() {
 }
 
 # Run the repository driver to test the divsufsort library.
-run() {
-    g++-7 -fcilkplus source/$DRIVER_NAME.cpp -o $DRIVER_NAME \
+analyze() {
+    g++-7 -fcilkplus source/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
         -l cilkrts -l divsufsort -l libprange &&
-    ./$DRIVER_NAME "$@"
-    rm -rf $DRIVER_NAME
+    ./$ANALYZER_NAME "$@"
+    rm -rf $ANALYZER_NAME
 }
 
 # Analyze the results using the provided Python script.
-analyze() {
-    python3 source/$ANALYZER_NAME $1
+graph() {
+    python3 source/$GRAPHER_NAME $1
 }
 
 # Main entry point of this script.
@@ -51,10 +51,10 @@ case "$1" in
     "--install-deps")
         install_dependencies
         ;;
-    "--run")
-        run "${@:2}"
-        ;;
     "--analyze")
-        analyze $2
+        analyze "${@:2}"
+        ;;
+    "--graph")
+        graph $2
         ;;
 esac
