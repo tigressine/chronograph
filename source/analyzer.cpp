@@ -1,5 +1,6 @@
 // A driver program that analyzes the parallel-divsufsort library. This isn't
 // the cleanest C++ you'll ever see. Please forgive my inevitable blasphemies.
+
 // Written by Tiger Sachse.
 
 #include <cmath>
@@ -61,7 +62,7 @@ void write_averages(double* averages, int max_threads, char* input_name) {
     if (averages == NULL || input_name == NULL) {
         std::cout << "Passed NULL to write_averages!\n";
 
-        return;
+        exit(1);
     }
 
     // Create the output file name string.
@@ -77,7 +78,7 @@ void write_averages(double* averages, int max_threads, char* input_name) {
     if (output_file.fail()) {
         std::cout << "File '" << output_name << "' could not be written.\n";
 
-        return;
+        exit(1);
     }
 
     // Write the results to the output file.
@@ -95,7 +96,7 @@ int main(int argument_count, char* arguments[]) {
 
     // If the user has not entered enough arguments, scream about it.
     if (argument_count < 4) {
-        std::cout << "Usage: ./chronograph [file] [max threads] [max runs]\n";
+        std::cout << "Usage: ./analyzer [file] [max threads] [max runs]\n";
 
         return -1;
     }
