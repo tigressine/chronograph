@@ -9,6 +9,13 @@ cd chronograph
 sudo bash chronograph.sh --install-deps
 ```
 
+# sample texts
+To download sample text files from the Internet, run this command:
+```
+bash chronograph.sh --download-samples
+```
+The texts come from [Pizza&Chili](http://pizzachili.dcc.uchile.cl/texts.html) and are saved into a folder called `samples`.
+
 # usage
 This project analyzes the `divsufsort()` function and graphs the results separately. To analyze the function and produce a results data file, execute the following command:
 ```
