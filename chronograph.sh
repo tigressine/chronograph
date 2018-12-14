@@ -1,9 +1,28 @@
 # An operations script that makes working with this repository easier.
 # Written by Tiger Sachse.
 
+SAMPLE_DIR="samples"
 ANALYZER_NAME="analyzer"
 GRAPHER_NAME="grapher.py"
 BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
+SAMPLES="code/sources
+         music/pitches
+         protein/proteins
+         dna/dna
+         nlang/english.1024MB
+         xml/dblp.xml"
+
+# Download sample text files from the Internet.
+download_samples() {
+    rm -rf $SAMPLE_DIR
+    mkdir $SAMPLE_DIR
+
+    for SAMPLE in $SAMPLES; do
+        wget http://pizzachili.dcc.uchile.cl/texts/$SAMPLE.gz -P $SAMPLE_DIR
+    done
+        
+    gzip -d $SAMPLE_DIR/*
+}
 
 # Install necessary dependencies for this repository to function.
 install_dependencies() {
@@ -13,7 +32,7 @@ install_dependencies() {
     fi
 
     # This function needs these packages to build the required divsufsort library.
-    apt install git cmake make g++-7 python3-matplotlib
+    apt install gzip git cmake make g++-7 python3-matplotlib
 
     # Override any existing compilers and use the g++-7 compiler.
     export CC="g++-7;$CC"
@@ -48,6 +67,9 @@ graph() {
 
 # Main entry point of this script.
 case "$1" in
+    "--download-samples")
+        download_samples
+        ;;
     "--install-deps")
         install_dependencies
         ;;
