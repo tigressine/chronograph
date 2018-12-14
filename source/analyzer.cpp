@@ -1,4 +1,4 @@
-// A driver program that tests the parallel-divsufsort library. This isn't
+// A driver program that analyzes the parallel-divsufsort library. This isn't
 // the cleanest C++ you'll ever see. Please forgive my inevitable blasphemies.
 // Written by Tiger Sachse.
 
