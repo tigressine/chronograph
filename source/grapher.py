@@ -46,10 +46,14 @@ except FileNotFoundError:
 except Exception:
     panic('Something went wrong!')
 
+# Get the name of the input file.
+file_stem = str(Path(sys.argv[1]).stem)
+
 # Plot the counts and seconds using matplotlib.
 pyplot.plot(counts, seconds)
+pyplot.title('DivSufSort execution time for \'{0}\''.format(file_stem.upper()))
 pyplot.xlabel('Thread count')
 pyplot.ylabel('Seconds')
 
 # Save the graph.
-pyplot.savefig(OUTPUT_FILE_FORMAT.format(str(Path(sys.argv[1]).stem)))
+pyplot.savefig(OUTPUT_FILE_FORMAT.format(file_stem))
