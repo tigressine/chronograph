@@ -53,7 +53,7 @@ install_dependencies() {
 }
 
 # Run the repository driver to test the divsufsort library.
-analyze() {
+analyze_text() {
     g++-7 -fcilkplus source/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
         -l cilkrts -l divsufsort -l libprange &&
     ./$ANALYZER_NAME "$@"
@@ -61,7 +61,7 @@ analyze() {
 }
 
 # Analyze the results using the provided Python script.
-graph() {
+graph_data() {
     python3 source/$GRAPHER_NAME $1
 }
 
@@ -74,9 +74,9 @@ case "$1" in
         install_dependencies
         ;;
     "--analyze")
-        analyze "${@:2}"
+        analyze_text "${@:2}"
         ;;
     "--graph")
-        graph $2
+        graph_data $2
         ;;
 esac
