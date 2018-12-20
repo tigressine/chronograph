@@ -8,33 +8,60 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <string.h>
+#include <sstream> // for ostringstream
+#include <vector>
 #include <divsufsort.h>
+#include <tclap/CmdLine.h>
+
+#ifndef PAROPENMP
+#ifndef PARCILKPLUS
+#define PARCILKPLUS 1
+#endif
+#endif
+
+#if defined(PARCILKPLUS) // cilk++
+#include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
+#elif defined(PAROPENMP) // openmp
+#include <omp.h>
+#else // c++
+#endif
+
+void set_num_threads(int nthreads){
+
+#if defined(PARCILKPLUS)
+  std::ostringstream sbuf;
+  sbuf << nthreads ;
+  __cilkrts_end_cilk();
+  __cilkrts_set_param("nworkers", sbuf.str().c_str());
+#elif defined(PAROPENMP)
+   omp_set_dynamic(0);
+   omp_set_num_threads(nthreads);
+#else
+
+#endif
+
+}
+
 
 // Run timed divsufsort tests for a string using a range of thread counts.
-double* run_tests(const std::string& text, int max_threads, int max_runs) {
+std::vector<double>
+run_tests(const std::string& text, int max_threads, int max_runs) {
     auto size = text.size();
-    auto suffix_array = new int64_t[size];
-    auto total_times = new std::chrono::milliseconds[max_threads]();
+    auto suffix_array = std::vector<int64_t>(size);
+    auto total_times = std::vector<std::chrono::milliseconds>(max_threads);
 
     // For each run, test the function using a range of thread caps.
-    for (int run = 0; run < max_runs; run++) {
-        for (int thread = 1; thread <= max_threads; thread++) {
+    for (int thread = 2; thread <= max_threads; thread++) {
 
-            // Write a character array version of the thread number to the buffer.
-            auto buffer = new char[(int) std::log10(max_threads) + 2]();
-            sprintf(buffer, "%d", thread);
+        // Set the number of threads for this function call.
+        set_num_threads(thread);
 
-            // Set the number of threads for this function call.
-            __cilkrts_end_cilk();
-            __cilkrts_set_param("nworkers", buffer);
-
-            delete[] buffer;
+        for (int run = 0; run < max_runs; run++) {
 
             // Run the function and save the start and end times.
             auto start = std::chrono::steady_clock::now();
-            divsufsort((sauchar_t*) text.data(), suffix_array, size);
+            divsufsort((sauchar_t*) text.data(), suffix_array.data(), size);
             auto end = std::chrono::steady_clock::now();
 
             // Save the time difference in the total_times array. The
@@ -45,21 +72,17 @@ double* run_tests(const std::string& text, int max_threads, int max_runs) {
     }
 
     // Calculate the averages for every thread count.
-    auto averages = new double[max_threads];
+    auto averages = std::vector<double>(max_threads);
     for (int thread = 1; thread <= max_threads; thread++) {
         averages[thread - 1] = total_times[thread - 1].count() / 1000.0 / max_runs;
     }
-
-    // Clean up after yourself!
-    delete[] total_times;
-    delete[] suffix_array;
 
     return averages;
 }
 
 // Write the averages array to a data output file.
-void write_averages(double* averages, int max_threads, char* input_name) {
-    if (averages == NULL || input_name == NULL) {
+void write_averages(std::vector<double>& averages, int max_threads, char* input_name) {
+    if (averages.size() == 0 || input_name == NULL) {
         std::cout << "Passed NULL to write_averages!\n";
 
         exit(1);
@@ -91,27 +114,56 @@ void write_averages(double* averages, int max_threads, char* input_name) {
     output_file.close();
 }
 
+int parse_args(int argc, char *argv[], std::string& fname, int& maxt, int& nruns){
+    try{
+        TCLAP::CmdLine cmd("Evaluate performance of parallel-divsufsort", ' ', "0.1");
+        TCLAP::UnlabeledValueArg<std::string>  infile( "infile", "Input file", true,
+                                                       "",
+                                                       "FILE"  );
+        cmd.add( infile );
+        TCLAP::UnlabeledValueArg<int>  max_threads( "max_threads", "Max. Threads", true,
+                                                   4,
+                                                  "INTEGER"  );
+        cmd.add( max_threads );
+        TCLAP::UnlabeledValueArg<int>  num_runs( "num_runs", "Max. Runs", true, 1,
+                                                "INTEGER"  );
+        cmd.add( num_runs );
+
+        cmd.parse(argc, argv);
+
+        fname = infile.getValue();
+        maxt = max_threads.getValue();
+        nruns = num_runs.getValue();
+
+
+    } catch (TCLAP::ArgException& ex){
+        std::cerr << "Arg Error : " << ex.error() 
+                  << " for " << ex.argId() << std::endl;
+        return -1;
+    }
+    return 0;
+}
+
 // Main function and entry point of the program.
 int main(int argument_count, char* arguments[]) {
+    // Parse max_threads and max_runs from the input vector.
+    std::string infile;
+    int max_threads;
+    int max_runs;
 
     // If the user has not entered enough arguments, scream about it.
-    if (argument_count < 4) {
-        std::cout << "Usage: ./analyzer [file] [max threads] [max runs]\n";
-
+    if (parse_args(argument_count, arguments,
+                   infile, max_threads, max_runs) != 0) {
         return -1;
     }
 
     // Attempt to open the text file.
-    std::ifstream input(arguments[1]);
+    std::ifstream input(infile.c_str());
     if (input.fail()) {
-        std::cout << "File '" << arguments[1] << "' could not be read.\n";
-
+        std::cout << "File '" << infile << "' could not be read.\n";
         return -1;
     }
 
-    // Parse max_threads and max_runs from the input vector.
-    auto max_threads = std::stoi(arguments[2], NULL, 10);
-    auto max_runs = std::stoi(arguments[3], NULL, 10);
 
     // Create a string from the text file.
     std::string text;
@@ -124,7 +176,6 @@ int main(int argument_count, char* arguments[]) {
     // Write these averages to a data file, then free the averages array.
     auto averages = run_tests(text, max_threads, max_runs);
     write_averages(averages, max_threads, arguments[1]);
-    delete[] averages;
 
     return 0;
 }

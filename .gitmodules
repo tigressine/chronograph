@@ -1,0 +1,6 @@
+[submodule "ext/parallel-divsufsort"]
+	path = ext/parallel-divsufsort
+	url = https://github.com/srirampc/parallel-divsufsort.git
+[submodule "ext/tclap"]
+	path = ext/tclap
+	url = https://github.com/mirror/tclap.git
