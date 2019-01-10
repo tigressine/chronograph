@@ -40,7 +40,7 @@ install_dependencies() {
 
     # Clone the divsufsort library repository into a temporary build directory.
     rm -r $BUILD_DIR
-    git clone https://github.com/jlabeit/parallel-divsufsort.git $BUILD_DIR
+    git clone https://github.com/srirampc/parallel-divsufsort.git $BUILD_DIR
     cd $BUILD_DIR
 
     mkdir build
