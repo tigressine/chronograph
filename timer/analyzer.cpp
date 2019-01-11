@@ -18,10 +18,15 @@
 // PUT TIMES INTO TIME ARRAY
 
 // Run timed divsufsort tests for a string using a range of thread counts.
-double*
+double**
 run_tests(const std::string& text, int max_threads, int max_runs) {
     auto size = text.size();
     auto suffix_array = new int64_t[size];
+
+    auto total_times = new std::chrono::milliseconds*[max_threads]();
+    for (int index = 0; index < max_threads; index++) {
+        total_times[index] = new std::chrono::milliseconds[2];
+    }
 
     // For each run, test the function using a range of thread caps.
     for (int run = 0; run < max_runs; run++) {
@@ -37,13 +42,12 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
 
             delete[] buffer;
 
-            auto total_times = divsufsort(
+            divsufsort(
                 (sauchar_t*) text.data(),
                 suffix_array,
                 size,
-                thread,
-                max_threads,
-                max_runs
+                total_times[thread - 1],
+                total_times[thread - 1] + 1
             );
         }
     }
@@ -56,9 +60,13 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
       }
   
     // Clean up after yourself!
+    for (int index = 0; index < max_threads; index++) {
+        delete[] total_times[index];
+    }
+    delete[] total_times;
     delete[] suffix_array;
 
-    return NULL;
+    return averages;
 }
 
 // Write the averages array to a data output file.
@@ -129,8 +137,13 @@ main(int argument_count, char* arguments[]) {
     // Capture averages for different thread counts from the tests.
     // Write these averages to a data file, then free the averages array.
     auto averages = run_tests(text, max_threads, max_runs);
-    write_averages(averages, max_threads, arguments[1]);
-    delete[] averages;
+   
+    for (int i = 0; i < max_threads; i++) {     
+        std::cout << averages[i][0] << " " << averages[i][1] << "\n";
+    }
+    
+    //write_averages(averages, max_threads, arguments[1]);
+    //delete[] averages;
 
     return 0;
 }

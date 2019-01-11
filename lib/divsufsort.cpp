@@ -346,9 +346,6 @@ sort_typeBstar(const sauchar_t *T, saidx_t *SA,
   return m;
 }
 
-
-
-
 template<class saidx_t>
 class cached_bucket_writer {
 	private:
@@ -718,20 +715,18 @@ construct_BWT(const sauchar_t *T, saidx_t *SA,
 
 /*- Function -*/
 template<class saidx_t>
-double**
+void
 divsufsort(const sauchar_t *T, saidx_t *SA, saidx_t n,
-           int thread, int max_threads, int max_runs){
+           std::chrono::milliseconds *time_bstar,
+           std::chrono::milliseconds *time_construct_sa){
   saidx_t *bucket_A, *bucket_B;
   saidx_t m;
-  saint_t err = 0;
-  
-  auto total_times = new std::chrono::milliseconds[max_threads][2]();
   
   /* Check arguments. */
-  if((T == NULL) || (SA == NULL) || (n < 0)) { return NULL; }
-  else if(n == 0) { return NULL; }
-  else if(n == 1) { SA[0] = 0; return NULL; }
-  else if(n == 2) { m = (T[0] < T[1]); SA[m ^ 1] = 0, SA[m] = 1; return NULL; }
+  if((T == NULL) || (SA == NULL) || (n < 0)) { return; }
+  else if(n == 0) { return; }
+  else if(n == 1) { SA[0] = 0; return; }
+  else if(n == 2) { m = (T[0] < T[1]); SA[m ^ 1] = 0, SA[m] = 1; return; }
 
   bucket_A = newA(saidx_t, BUCKET_A_SIZE);
   bucket_B = newA(saidx_t, BUCKET_B_SIZE);
@@ -742,31 +737,17 @@ divsufsort(const sauchar_t *T, saidx_t *SA, saidx_t n,
     m = sort_typeBstar(T, SA, bucket_A, bucket_B, n);
     auto end = std::chrono::steady_clock::now();
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    total_times[thread - 1][0] += difference;
+    *time_bstar = *time_bstar + difference;
 
     start = std::chrono::steady_clock::now();
     construct_SA(T, SA, bucket_A, bucket_B, n, m);
     end = std::chrono::steady_clock::now();
     difference = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    total_times[thread - 1][1] += difference;
-  } else {
-    err = -2;
+    *time_construct_sa = *time_construct_sa + difference;
   }
 
-  auto averages = new double*[max_threads];
-  for (int thread = 1; thread <= max_threads; thread++) {
-      averages[thread - 1] = new double[2];
-      averages[thread - 1][0] = total_times[thread - 1][0].count() / 1000.0 / max_runs;
-      averages[thread - 1][1] = total_times[thread - 1][1].count() / 1000.0 / max_runs;
-  }
-  
-  // Clean up after yourself!
-  delete[] total_times;
-  
   free(bucket_B);
   free(bucket_A);
-
-  return averages;
 }
 
 template<class saidx_t>
@@ -805,15 +786,17 @@ divbwt(const sauchar_t *T, sauchar_t *U, saidx_t *A, saidx_t n) {
   return pidx;
 }
 
-double**
+void
 divsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
-           int thread, int max_threads, int max_runs){
-	return divsufsort<int32_t>(T, SA, n, thread, max_threads, max_runs);
+           std::chrono::milliseconds *time_bstar,
+           std::chrono::milliseconds *time_construct_sa){
+	return divsufsort<int32_t>(T, SA, n, time_bstar, time_construct_sa);
 }
-double**
+void
 divsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
-           int thread, int max_threads, int max_runs){
-	return divsufsort<int64_t>(T, SA, n, thread, max_threads, max_runs);
+           std::chrono::milliseconds *time_bstar,
+           std::chrono::milliseconds *time_construct_sa){
+	return divsufsort<int64_t>(T, SA, n, time_bstar, time_construct_sa);
 }
 
 int32_t

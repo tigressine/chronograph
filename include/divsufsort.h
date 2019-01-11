@@ -27,6 +27,7 @@
 #ifndef _DIVSUFSORT_H
 #define _DIVSUFSORT_H 1
 
+#include <chrono>
 #include <inttypes.h>
 /*- Datatypes -*/
 typedef uint8_t sauchar_t;
@@ -41,10 +42,14 @@ typedef int32_t saint_t;
  * @param n The length of the given string.
  * @return 0 if no error occurred, -1 or -2 otherwise.
  */
-double**
-divsufsort(const sauchar_t *T, int32_t *SA, int32_t n);
-double**
-divsufsort(const sauchar_t *T, int64_t *SA, int64_t n);
+void
+divsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
+           std::chrono::milliseconds *time_bstar,
+           std::chrono::milliseconds *time_construct_sa);
+void
+divsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
+           std::chrono::milliseconds *time_bstar,
+           std::chrono::milliseconds *time_construct_sa);
 
 /**
  * Constructs the burrows-wheeler transformed string of a given string.

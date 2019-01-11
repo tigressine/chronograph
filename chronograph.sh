@@ -13,7 +13,6 @@ SAMPLES="code/sources
 
 # Download sample text files from the Internet.
 download_samples() {
-    rm -rf $SAMPLE_DIR
     mkdir $SAMPLE_DIR
 
     for SAMPLE in $SAMPLES; do
@@ -52,7 +51,7 @@ install_project() {
 
 # Run the repository driver to test the divsufsort library.
 analyze_text() {
-    g++-7 -fcilkplus source/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
+    g++-7 -fcilkplus timer/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
         -l cilkrts -l divsufsort -l libprange &&
     ./$ANALYZER_NAME "$@"
     rm -rf $ANALYZER_NAME
@@ -60,7 +59,7 @@ analyze_text() {
 
 # Analyze the results using the provided Python script.
 graph_data() {
-    python3 source/$GRAPHER_NAME $1
+    python3 timer/$GRAPHER_NAME $1
 }
 
 # Main entry point of this script.
