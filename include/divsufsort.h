@@ -41,9 +41,9 @@ typedef int32_t saint_t;
  * @param n The length of the given string.
  * @return 0 if no error occurred, -1 or -2 otherwise.
  */
-saint_t
+double**
 divsufsort(const sauchar_t *T, int32_t *SA, int32_t n);
-saint_t
+double**
 divsufsort(const sauchar_t *T, int64_t *SA, int64_t n);
 
 /**
@@ -129,4 +129,24 @@ saint_t sufcheck(const sauchar_t *T, const int64_t *SA,
 //sa_simplesearch(const sauchar_t *T, saidx_t Tsize,
 //                const saidx_t *SA, saidx_t SAsize,
 //                saint_t c, saidx_t *left);
+
+int32_t
+sort_typeBstar(const sauchar_t *T, int32_t *SA,
+               int32_t *bucket_A, int32_t *bucket_B,
+               int32_t n);
+int64_t
+sort_typeBstar(const sauchar_t *T, int64_t *SA,
+               int64_t *bucket_A, int64_t *bucket_B,
+               int64_t n);
+
+void
+construct_SA(const sauchar_t *T, int32_t *SA,
+             int32_t *bucket_A, int32_t *bucket_B,
+             int32_t n, int32_t m);
+
+void
+construct_SA(const sauchar_t *T, int64_t *SA,
+             int64_t *bucket_A, int64_t *bucket_B,
+             int64_t n, int64_t m) ;
+
 #endif /* _DIVSUFSORT_H */
