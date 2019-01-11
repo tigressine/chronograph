@@ -27,6 +27,7 @@
 #include "memory.h"
 #include "divsufsort_private.h"
 #include "parallel.hpp"
+#include <chrono>
 #include "sequence.h"
 #ifdef _OPENMP
 # include <omp.h>

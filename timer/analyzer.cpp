@@ -12,11 +12,16 @@
 #include <divsufsort.h>
 #include <cilk/cilk_api.h>
 
+// CHANGE OUT CLOCK MECHANISM
+// FIX INPUTS, TAKE TIME ARRAY
+// MAKE TIME ARRAY 2 ROWS
+// PUT TIMES INTO TIME ARRAY
+
 // Run timed divsufsort tests for a string using a range of thread counts.
-double* run_tests(const std::string& text, int max_threads, int max_runs) {
+double*
+run_tests(const std::string& text, int max_threads, int max_runs) {
     auto size = text.size();
     auto suffix_array = new int64_t[size];
-    auto total_times = new std::chrono::milliseconds[max_threads]();
 
     // For each run, test the function using a range of thread caps.
     for (int run = 0; run < max_runs; run++) {
@@ -32,33 +37,33 @@ double* run_tests(const std::string& text, int max_threads, int max_runs) {
 
             delete[] buffer;
 
-            // Run the function and save the start and end times.
-            auto start = std::chrono::steady_clock::now();
-            divsufsort((sauchar_t*) text.data(), suffix_array, size);
-            auto end = std::chrono::steady_clock::now();
-
-            // Save the time difference in the total_times array. The
-            // average across all runs will be calculated from this sum later.
-            auto difference = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            total_times[thread - 1] += difference;
+            auto total_times = divsufsort(
+                (sauchar_t*) text.data(),
+                suffix_array,
+                size,
+                thread,
+                max_threads,
+                max_runs
+            );
         }
     }
 
-    // Calculate the averages for every thread count.
-    auto averages = new double[max_threads];
-    for (int thread = 1; thread <= max_threads; thread++) {
-        averages[thread - 1] = total_times[thread - 1].count() / 1000.0 / max_runs;
-    }
-
+      auto averages = new double*[max_threads];
+      for (int thread = 1; thread <= max_threads; thread++) {
+          averages[thread - 1] = new double[2];
+          averages[thread - 1][0] = total_times[thread - 1][0].count() / 1000.0 / max_runs;
+          averages[thread - 1][1] = total_times[thread - 1][1].count() / 1000.0 / max_runs;
+      }
+  
     // Clean up after yourself!
-    delete[] total_times;
     delete[] suffix_array;
 
-    return averages;
+    return NULL;
 }
 
 // Write the averages array to a data output file.
-void write_averages(double* averages, int max_threads, char* input_name) {
+void
+write_averages(double* averages, int max_threads, char* input_name) {
     if (averages == NULL || input_name == NULL) {
         std::cout << "Passed NULL to write_averages!\n";
 
@@ -92,7 +97,8 @@ void write_averages(double* averages, int max_threads, char* input_name) {
 }
 
 // Main function and entry point of the program.
-int main(int argument_count, char* arguments[]) {
+int
+main(int argument_count, char* arguments[]) {
 
     // If the user has not entered enough arguments, scream about it.
     if (argument_count < 4) {

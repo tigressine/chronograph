@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 INCLUDE (CheckIncludeFiles)
-include("${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/AppendCompilerFlags.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmakemodules/AppendCompilerFlags.cmake")
 
 project (Parallel-Divsufsort CXX)
 set(PROJECT_VENDOR "Julian Labeit")
@@ -41,4 +41,3 @@ endif()
 add_subdirectory (external)
 add_subdirectory (include)
 add_subdirectory (lib)
-add_subdirectory (examples)

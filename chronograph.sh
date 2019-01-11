@@ -4,7 +4,6 @@
 SAMPLE_DIR="samples"
 ANALYZER_NAME="analyzer"
 GRAPHER_NAME="grapher.py"
-BUILD_DIR="/tmp/temporary_build_dir_parallel_divsufsort"
 SAMPLES="code/sources
          music/pitches
          protein/proteins
@@ -24,8 +23,8 @@ download_samples() {
     gzip -d $SAMPLE_DIR/*
 }
 
-# Install necessary dependencies for this repository to function.
-install_dependencies() {
+# Install the project.
+install_project() {
     if [[ $EUID -ne 0 ]]; then
         echo "This operation must be run as root." 
         exit 1
@@ -38,18 +37,17 @@ install_dependencies() {
     export CC="g++-7;$CC"
     export CXX="g++-7;$CXX"
 
-    # Clone the divsufsort library repository into a temporary build directory.
-    rm -r $BUILD_DIR
-    git clone https://github.com/srirampc/parallel-divsufsort.git $BUILD_DIR
-    cd $BUILD_DIR
-
+    rm -rf build
     mkdir build
     cd build
 
-    # Install the divsufsort library using cmake.
+    # Install this project using cmake.
     cmake ..
     make
     make install
+
+    cd ..
+    rm -rf build
 }
 
 # Run the repository driver to test the divsufsort library.
@@ -70,8 +68,8 @@ case "$1" in
     "--download-samples")
         download_samples
         ;;
-    "--install-deps")
-        install_dependencies
+    "--install")
+        install_project
         ;;
     "--analyze")
         analyze_text "${@:2}"
