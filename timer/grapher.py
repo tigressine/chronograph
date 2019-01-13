@@ -6,6 +6,7 @@ import re
 import sys
 from pathlib import Path
 import matplotlib.pyplot as pyplot
+from matplotlib.ticker import MaxNLocator
 
 OUTPUT_FILE_FORMAT = '{0}.png'
 LINE_FORMAT = (
@@ -55,12 +56,16 @@ except Exception:
 # Get the name of the input file.
 file_stem = str(Path(sys.argv[1]).stem)
 
+# Set the x axis to only ever be whole integers.
+axis = pyplot.figure().gca()
+axis.xaxis.set_major_locator(MaxNLocator(integer=True))
+
 # Plot the overall function timing using matplotlib.
 pyplot.plot(thread_counts, divsufsort_times)
 pyplot.plot(thread_counts, bstar_times)
 pyplot.plot(thread_counts, construct_sa_times)
 pyplot.title('DivSufSort execution time for \'{0}\''.format(file_stem.upper()))
-pyplot.xlabel('Thread Count')
+pyplot.xlabel('Thread count')
 pyplot.ylabel('Seconds')
 pyplot.legend(['DivSufSort', 'Sort B*', 'Construct SA'], loc='upper center')
 

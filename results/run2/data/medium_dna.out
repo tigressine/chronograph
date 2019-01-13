@@ -1,0 +1,5 @@
+Results for 'samples/medium_dna'
+Threads: 1 | Sort Type B*: 14.6088s | Construct SA: 7.3193s | Divsufsort: 21.9281s
+Threads: 2 | Sort Type B*: 9.5055s | Construct SA: 3.9631s | Divsufsort: 13.4686s
+Threads: 3 | Sort Type B*: 6.9851s | Construct SA: 2.7392s | Divsufsort: 9.7243s
+Threads: 4 | Sort Type B*: 5.7647s | Construct SA: 2.0734s | Divsufsort: 7.8381s
