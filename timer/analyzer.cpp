@@ -12,11 +12,6 @@
 #include <divsufsort.h>
 #include <cilk/cilk_api.h>
 
-// CHANGE OUT CLOCK MECHANISM
-// FIX INPUTS, TAKE TIME ARRAY
-// MAKE TIME ARRAY 2 ROWS
-// PUT TIMES INTO TIME ARRAY
-
 // Run timed divsufsort tests for a string using a range of thread counts.
 double**
 run_tests(const std::string& text, int max_threads, int max_runs) {
@@ -25,10 +20,10 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
 
     auto total_times = new std::chrono::milliseconds*[max_threads]();
     for (int index = 0; index < max_threads; index++) {
-        total_times[index] = new std::chrono::milliseconds[2];
+        total_times[index] = new std::chrono::milliseconds[3];
     }
 
-    // For each run, test the function using a range of thread caps.
+    // For each run, test the function and its pieces using a range of thread caps.
     for (int run = 0; run < max_runs; run++) {
         for (int thread = 1; thread <= max_threads; thread++) {
 
@@ -42,6 +37,8 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
 
             delete[] buffer;
 
+            // Test the pieces of the function and save the runtimes in the
+            // first two cells of total_times.
             timeableDivsufsort(
                 (sauchar_t*) text.data(),
                 suffix_array,
@@ -49,14 +46,26 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
                 total_times[thread - 1],
                 total_times[thread - 1] + 1
             );
+           
+            // Test an unadulterated version of the function and save the
+            // runtime into the last cell of total_times.
+            auto start = std::chrono::steady_clock::now();
+            divsufsort((sauchar_t*) text.data(), suffix_array, size);
+            auto end = std::chrono::steady_clock::now();
+            
+            total_times[thread - 1][2] = (
+                total_times[thread - 1][2]
+                + std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+            );
         }
     }
 
       auto averages = new double*[max_threads];
       for (int thread = 1; thread <= max_threads; thread++) {
-          averages[thread - 1] = new double[2];
+          averages[thread - 1] = new double[3];
           averages[thread - 1][0] = total_times[thread - 1][0].count() / 1000.0 / max_runs;
           averages[thread - 1][1] = total_times[thread - 1][1].count() / 1000.0 / max_runs;
+          averages[thread - 1][2] = total_times[thread - 1][2].count() / 1000.0 / max_runs;
       }
   
     // Clean up after yourself!
@@ -97,9 +106,10 @@ write_averages(double** averages, int max_threads, char* input_name) {
     // Write the results to the output file.
     output_file << "Results for '" << input_name << "'\n";
     for (int thread = 1; thread <= max_threads; thread++) {
-        output_file << "Thread count: " << thread;
-        output_file << " | Seconds to sort type B*: " << averages[thread - 1][0];
-        output_file << " | Seconds to construct SA: " << averages[thread - 1][1];
+        output_file << "Threads: " << thread;
+        output_file << " | Sort Type B*: " << averages[thread - 1][0] << "s";
+        output_file << " | Construct SA: " << averages[thread - 1][1] << "s";
+        output_file << " | Divsufsort: " << averages[thread - 1][2] << "s";
         output_file << "\n";
     }
 
