@@ -712,11 +712,35 @@ construct_BWT(const sauchar_t *T, saidx_t *SA,
 
 
 /*---------------------------------------------------------------------------*/
+template<class saidx_t>
+void
+divsufsort(const sauchar_t *T, saidx_t *SA, saidx_t n){
+  saidx_t *bucket_A, *bucket_B;
+  saidx_t m;
+  
+  /* Check arguments. */
+  if((T == NULL) || (SA == NULL) || (n < 0)) { return; }
+  else if(n == 0) { return; }
+  else if(n == 1) { SA[0] = 0; return; }
+  else if(n == 2) { m = (T[0] < T[1]); SA[m ^ 1] = 0, SA[m] = 1; return; }
+
+  bucket_A = newA(saidx_t, BUCKET_A_SIZE);
+  bucket_B = newA(saidx_t, BUCKET_B_SIZE);
+  
+  /* Suffixsort. */
+  if((bucket_A != NULL) && (bucket_B != NULL)) {
+    m = sort_typeBstar(T, SA, bucket_A, bucket_B, n);
+    construct_SA(T, SA, bucket_A, bucket_B, n, m);
+  }
+
+  free(bucket_B);
+  free(bucket_A);
+}
 
 /*- Function -*/
 template<class saidx_t>
 void
-divsufsort(const sauchar_t *T, saidx_t *SA, saidx_t n,
+timeableDivsufsort(const sauchar_t *T, saidx_t *SA, saidx_t n,
            std::chrono::milliseconds *time_bstar,
            std::chrono::milliseconds *time_construct_sa){
   saidx_t *bucket_A, *bucket_B;
@@ -787,16 +811,27 @@ divbwt(const sauchar_t *T, sauchar_t *U, saidx_t *A, saidx_t n) {
 }
 
 void
-divsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
-           std::chrono::milliseconds *time_bstar,
-           std::chrono::milliseconds *time_construct_sa){
-	return divsufsort<int32_t>(T, SA, n, time_bstar, time_construct_sa);
+divsufsort(const sauchar_t *T, int32_t *SA, int32_t n){
+	return divsufsort<int32_t>(T, SA, n);
 }
+
 void
-divsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
-           std::chrono::milliseconds *time_bstar,
-           std::chrono::milliseconds *time_construct_sa){
-	return divsufsort<int64_t>(T, SA, n, time_bstar, time_construct_sa);
+divsufsort(const sauchar_t *T, int64_t *SA, int64_t n){
+	return divsufsort<int64_t>(T, SA, n);
+}
+
+void
+timeableDivsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
+                   std::chrono::milliseconds *time_bstar,
+                   std::chrono::milliseconds *time_construct_sa){
+	return timeableDivsufsort<int32_t>(T, SA, n, time_bstar, time_construct_sa);
+}
+
+void
+timeableDivsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
+                   std::chrono::milliseconds *time_bstar,
+                   std::chrono::milliseconds *time_construct_sa){
+	return timeableDivsufsort<int64_t>(T, SA, n, time_bstar, time_construct_sa);
 }
 
 int32_t

@@ -43,13 +43,19 @@ typedef int32_t saint_t;
  * @return 0 if no error occurred, -1 or -2 otherwise.
  */
 void
-divsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
-           std::chrono::milliseconds *time_bstar,
-           std::chrono::milliseconds *time_construct_sa);
+divsufsort(const sauchar_t *T, int32_t *SA, int32_t n);
+
 void
-divsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
-           std::chrono::milliseconds *time_bstar,
-           std::chrono::milliseconds *time_construct_sa);
+divsufsort(const sauchar_t *T, int64_t *SA, int64_t n);
+
+void
+timeableDivsufsort(const sauchar_t *T, int32_t *SA, int32_t n,
+                   std::chrono::milliseconds *time_bstar,
+                   std::chrono::milliseconds *time_construct_sa);
+void
+timeableDivsufsort(const sauchar_t *T, int64_t *SA, int64_t n,
+                   std::chrono::milliseconds *time_bstar,
+                   std::chrono::milliseconds *time_construct_sa);
 
 /**
  * Constructs the burrows-wheeler transformed string of a given string.

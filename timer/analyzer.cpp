@@ -42,7 +42,7 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
 
             delete[] buffer;
 
-            divsufsort(
+            timeableDivsufsort(
                 (sauchar_t*) text.data(),
                 suffix_array,
                 size,
@@ -71,11 +71,11 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
 
 // Write the averages array to a data output file.
 void
-write_averages(double* averages, int max_threads, char* input_name) {
+write_averages(double** averages, int max_threads, char* input_name) {
     if (averages == NULL || input_name == NULL) {
         std::cout << "Passed NULL to write_averages!\n";
 
-        exit(1);
+        return;
     }
 
     // Create the output file name string.
@@ -91,14 +91,16 @@ write_averages(double* averages, int max_threads, char* input_name) {
     if (output_file.fail()) {
         std::cout << "File '" << output_name << "' could not be written.\n";
 
-        exit(1);
+        return;
     }
 
     // Write the results to the output file.
     output_file << "Results for '" << input_name << "'\n";
     for (int thread = 1; thread <= max_threads; thread++) {
         output_file << "Thread count: " << thread;
-        output_file << " | Seconds: " << averages[thread - 1] << "\n";
+        output_file << " | Seconds to sort type B*: " << averages[thread - 1][0];
+        output_file << " | Seconds to construct SA: " << averages[thread - 1][1];
+        output_file << "\n";
     }
 
     output_file.close();
@@ -138,12 +140,13 @@ main(int argument_count, char* arguments[]) {
     // Write these averages to a data file, then free the averages array.
     auto averages = run_tests(text, max_threads, max_runs);
    
-    for (int i = 0; i < max_threads; i++) {     
-        std::cout << averages[i][0] << " " << averages[i][1] << "\n";
-    }
+    write_averages(averages, max_threads, arguments[1]);
     
-    //write_averages(averages, max_threads, arguments[1]);
-    //delete[] averages;
+    // Clean up after yourself!
+    for (int average = 0; average < max_threads; average++) {
+        delete[] averages[average];
+    }
+    delete[] averages;
 
     return 0;
 }
