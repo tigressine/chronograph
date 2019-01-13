@@ -51,10 +51,15 @@ install_project() {
 
 # Run the repository driver to test the divsufsort library.
 analyze_text() {
-    g++-7 -fcilkplus timer/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
-        -l cilkrts -l divsufsort -l libprange &&
+    compile_analyzer &&
     ./$ANALYZER_NAME "$@"
     rm -rf $ANALYZER_NAME
+}
+
+# Compile the analyzer.
+compile_analyzer() {
+    g++-7 -fcilkplus timer/$ANALYZER_NAME.cpp -o $ANALYZER_NAME \
+        -l cilkrts -l divsufsort -l libprange
 }
 
 # Analyze the results using the provided Python script.
@@ -75,5 +80,8 @@ case "$1" in
         ;;
     "--graph")
         graph_data $2
+        ;;
+    "--compile")
+        compile_analyzer
         ;;
 esac

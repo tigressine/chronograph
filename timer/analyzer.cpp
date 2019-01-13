@@ -46,16 +46,10 @@ run_tests(const std::string& text, int max_threads, int max_runs) {
                 total_times[thread - 1],
                 total_times[thread - 1] + 1
             );
-           
-            // Test an unadulterated version of the function and save the
-            // runtime into the last cell of total_times.
-            auto start = std::chrono::steady_clock::now();
-            divsufsort((sauchar_t*) text.data(), suffix_array, size);
-            auto end = std::chrono::steady_clock::now();
-            
+          
             total_times[thread - 1][2] = (
-                total_times[thread - 1][2]
-                + std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+                total_times[thread - 1][0]
+                + total_times[thread - 1][1]
             );
         }
     }

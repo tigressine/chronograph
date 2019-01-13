@@ -62,7 +62,7 @@ pyplot.plot(thread_counts, construct_sa_times)
 pyplot.title('DivSufSort execution time for \'{0}\''.format(file_stem.upper()))
 pyplot.xlabel('Thread Count')
 pyplot.ylabel('Seconds')
-pyplot.legend(['DivSufSort', 'Sort B*', 'Construct SA'], loc='upper right')
+pyplot.legend(['DivSufSort', 'Sort B*', 'Construct SA'], loc='upper center')
 
 # Save the graph.
 pyplot.savefig(OUTPUT_FILE_FORMAT.format(file_stem))
