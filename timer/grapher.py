@@ -7,10 +7,12 @@ import sys
 from pathlib import Path
 import matplotlib.pyplot as pyplot
 
-OUTPUT_FILE_FORMAT = '{0}_graph.png'
+OUTPUT_FILE_FORMAT = '{0}.png'
 LINE_FORMAT = (
-    r'^Thread count: (?P<count>[0-9]+) \| '
-    + r'Seconds: (?P<seconds>[0-9]+(\.[0-9]+)?)\n$'
+    r'^Threads: (?P<thread_count>[0-9]+) \| '
+    + r'Sort Type B\*: (?P<bstar_time>[0-9]+(\.[0-9]+)?)s \| '
+    + r'Construct SA: (?P<construct_sa_time>[0-9]+(\.[0-9]+)?)s \| '
+    + r'Divsufsort: (?P<divsufsort_time>[0-9]+(\.[0-9]+)?)s\n$'
 )
 
 # Print a panic message and exit the program.
@@ -19,8 +21,10 @@ def panic(message):
     exit(1)
 
 try:
-    counts = []
-    seconds = []
+    bstar_times = []
+    thread_counts = []
+    divsufsort_times = []
+    construct_sa_times = []
 
     # Open the input data file.
     with open(sys.argv[1], 'r') as f:
@@ -28,13 +32,15 @@ try:
         # Skip the header line.
         f.readline()
 
-        # For each line in the file, extract the count and seconds, then
-        # add each to its respective list.
+        # For each line in the file, extract the thread count and all of the
+        # appropriate timings, then add each to its respective list.
         for line in f:
             line_match = re.match(LINE_FORMAT, line)
             if line_match:
-                counts.append(int(line_match.group('count')))
-                seconds.append(float(line_match.group('seconds')))
+                bstar_times.append(float(line_match.group('bstar_time')))
+                thread_counts.append(int(line_match.group('thread_count')))
+                divsufsort_times.append(float(line_match.group('divsufsort_time')))
+                construct_sa_times.append(float(line_match.group('construct_sa_time')))
             else:
                 raise SyntaxError
 except IndexError:
@@ -49,11 +55,14 @@ except Exception:
 # Get the name of the input file.
 file_stem = str(Path(sys.argv[1]).stem)
 
-# Plot the counts and seconds using matplotlib.
-pyplot.plot(counts, seconds)
+# Plot the overall function timing using matplotlib.
+pyplot.plot(thread_counts, divsufsort_times)
+pyplot.plot(thread_counts, bstar_times)
+pyplot.plot(thread_counts, construct_sa_times)
 pyplot.title('DivSufSort execution time for \'{0}\''.format(file_stem.upper()))
-pyplot.xlabel('Thread count')
+pyplot.xlabel('Thread Count')
 pyplot.ylabel('Seconds')
+pyplot.legend(['DivSufSort', 'Sort B*', 'Construct SA'], loc='upper right')
 
 # Save the graph.
 pyplot.savefig(OUTPUT_FILE_FORMAT.format(file_stem))
