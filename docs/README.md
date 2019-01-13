@@ -6,7 +6,7 @@ To download and configure this project, execute the following commands. Note tha
 ```
 git clone https://github.com/tgsachse/chronograph.git
 cd chronograph
-sudo bash chronograph.sh --install-deps
+sudo bash chronograph.sh --install
 ```
 
 # sample texts
@@ -41,4 +41,4 @@ Next, we graph the resulting data file like so:
 ```
 bash chronograph.sh --graph my_stuff.out
 ```
-This produces a new graph image named `my_stuff_graph.png`.
+This produces a new graph image named `my_stuff.png`.
